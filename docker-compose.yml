@@ -2,6 +2,7 @@ version: "3.7"
 services:
   sonarqube:
     container_name: sonarqube
+    platform: linux/amd64
     build:
       context: ./
       dockerfile: Dockerfile

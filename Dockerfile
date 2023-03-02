@@ -1,4 +1,4 @@
-FROM sonarqube:8.2-community
+FROM sonarqube:9.9.0-community
 
 MAINTAINER Erik Jacobs <erikmjacobs@gmail.com>
 MAINTAINER Siamak Sadeghianfar <siamaksade@gmail.com>
@@ -19,7 +19,7 @@ LABEL summary="$SUMMARY" \
   release="$SONAR_VERSION"
 
 # Define Plug-in Versions
-ARG SONAR_ZAP_PLUGIN_VERSION=1.2.0
+ARG SONAR_ZAP_PLUGIN_VERSION=2.3.0
 ENV SONARQUBE_PLUGIN_DIR="$SONARQUBE_HOME/extensions/plugins"
 
 # Switch to root for package installs
@@ -52,13 +52,16 @@ RUN set -x \
   && curl -o "sonar-zap-plugin-$SONAR_ZAP_PLUGIN_VERSION.jar" -fsSL "https://github.com/Coveros/zap-sonar-plugin/releases/download/sonar-zap-plugin-$SONAR_ZAP_PLUGIN_VERSION/sonar-zap-plugin-$SONAR_ZAP_PLUGIN_VERSION.jar"
 
 WORKDIR $SONARQUBE_HOME
+# RUN echo "bootstrap.system_call_filter: false" >> $SONARQUBE_HOME/elasticsearch/config/elasticsearch.yml
+RUN echo "sonar.search.java.AdditionalOpts=-Dbootstrap.system_call_filter=false" >> $SONARQUBE_HOME/conf/sonar.properties
+EXPOSE 9000
 
 # In order to drop the root user, we have to make some directories world
-# writable as OpenShift default security model is to run the container under
+# writable as OpenShift default security model is to run the container under` 
 # random UIDs.
-RUN chown -R 1001:0 "$SONARQUBE_HOME" \
-  && chgrp -R 0 "$SONARQUBE_HOME" \
-  && chmod -R g+rwX "$SONARQUBE_HOME" \
-  && chmod 775 "$SONARQUBE_HOME/bin/run.sh"
+# RUN chown -R 1001:0 "$SONARQUBE_HOME" \
+#   && chgrp -R 0 "$SONARQUBE_HOME" \
+#   && chmod -R g+rwX "$SONARQUBE_HOME" \
+#   && chmod 775 "$SONARQUBE_HOME/bin/run.sh"
 
 USER 1001
